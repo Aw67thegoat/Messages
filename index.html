@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Family Nexus // Messenger</title>
+    <style>
+        :root {
+            --bg-dark: #0a0b10;
+            --bg-panel: #121420;
+            --accent-glow: #00f0ff;
+            --accent-purple: #9d4edd;
+            --text-main: #f4f4f6;
+            --text-muted: #6c757d;
+            --border-color: #24293e;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        /* View Switching Logic */
+        .view {
+            display: none;
+            width: 100%;
+            height: 100%;
+        }
+
+        .view.active {
+            display: flex;
+        }
+
+        /* --- LOGIN VIEW --- */
+        #login-view {
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .login-card {
+            background-color: var(--bg-panel);
+            border: 1px solid var(--border-color);
+            box-shadow: 0 0 20px rgba(0, 240, 255, 0.1);
+            border-radius: 12px;
+            padding: 40px;
+            width: 100%;
+            max-width: 450px;
+            text-align: center;
+        }
+
+        .login-card h1 {
+            font-size: 1.8rem;
+            margin-bottom: 10px;
+            letter-spacing: 1px;
+            color: #fff;
+            text-transform: uppercase;
+        }
+
+        .login-card h1 span {
+            color: var(--accent-glow);
+            text-shadow: 0 0 10px rgba(0, 240, 255, 0.5);
+        }
+
+        .subtitle {
+            color: var(--text-muted);
+            margin-bottom: 30px;
+            font-size: 0.9rem;
+        }
+
+        .profile-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+
+        .profile-btn {
+            background-color: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 20px 10px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .profile-btn:hover {
+            border-color: var(--accent-purple);
+            box-shadow: 0 0 12px rgba(157, 78, 221, 0.3);
+            transform: translateY(-2px);
+            background-color: rgba(157, 78, 221, 0.05);
+        }
+
+        .avatar-circle {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4rem;
+            font-weight: bold;
+            color: #fff;
+        }
+
+        .profile-name {
+            color: var(--text-main);
+            font-weight: 500;
+            font-size: 1rem;
+        }
+
+        /* --- APP VIEW --- */
+        #app-view {
+            flex-direction: row;
+        }
+
+        /* Sidebar styling */
+        .sidebar {
+            width: 280px;
+            background-color: var(--bg-panel);
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar-header {
+            padding: 20px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .current-user-tag {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .current-user-tag .avatar-circle {
+            width: 32px;
+            height: 32px;
+            font-size: 0.9rem;
+        }
+
+        .logout-btn {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 0.85rem;
+            text-decoration: underline;
+        }
+
+        .logout-btn:hover {
+            color: var(--accent-glow);
+        }
+
+        .member-list {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .member-list-title {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-muted);
+            margin-bottom: 15px;
+        }
+
+        .member-status-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 0;
+            opacity: 0.85;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background-color: #2ec4b6;
+            border-radius: 50%;
+            box-shadow: 0 0 6px #2ec4b6;
+        }
+
+        /* Main Chat Area */
+        .chat-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background-color: var(--bg-dark);
+        }
+
+        .chat-header {
+            height: 73px;
+            padding: 20px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            background-color: rgba(18, 20, 32, 0.5);
+        }
+
+        .chat-title h2 {
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        .chat-title p {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        .message-wall {
+            flex: 1;
+            padding: 25px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        /* Message Bubble Blocks */
+        .msg-row {
+            display: flex;
+            flex-direction: column;
+            max-width: 70%;
+            width: fit-content;
+        }
+
+        .msg-row.incoming {
+            align-self: flex-start;
+            align-items: flex-start;
+        }
+
+        .msg-row.outgoing {
+            align-self: flex-end;
+            align-items: flex-end;
+        }
+
+        .msg-meta {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-bottom: 4px;
+            padding: 0 4px;
+        }
+
+        .msg-bubble {
+            padding: 12px 16px;
+            border-radius: 14px;
+            font-size: 0.95rem;
+            line-height: 1.4;
+            word-break: break-word;
+        }
+
+        .incoming .msg-bubble {
+            background-color: var(--bg-panel);
+            color: var(--text-main);
+            border: 1px solid var(--border-color);
+            border-top-left-radius: 2px;
+        }
+
+        .outgoing .msg-bubble {
+            background: linear-gradient(135deg, var(--accent-purple), #7209b7);
+            color: #fff;
+            border-top-right-radius: 2px;
+            box-shadow: 0 3px 10px rgba(157, 78, 221, 0.15);
+        }
+
+        /* Input Deck */
+        .input-deck {
+            padding: 20px;
+            border-top: 1px solid var(--border-color);
+            background-color: var(--bg-panel);
+        }
+
+        .input-form {
+            display: flex;
+            gap: 12px;
+        }
+
+        .input-form input {
+            flex: 1;
+            background-color: var(--bg-dark);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 14px 16px;
+            color: var(--text-main);
+            font-size: 0.95rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .input-form input:focus {
+            border-color: var(--accent-glow);
+        }
+
+        .send-btn {
+            background-color: var(--accent-glow);
+            color: var(--bg-dark);
+            border: none;
+            border-radius: 8px;
+            padding: 0 24px;
+            font-weight: bold;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .send-btn:hover {
+            box-shadow: 0 0 12px rgba(0, 240, 255, 0.6);
+            opacity: 0.9;
+        }
+
+        /* Customize scrollbars */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--border-color);
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--text-muted);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 1. LOGIN / IDENTITY VIEW -->
+    <div id="login-view" class="view active">
+        <div class="login-card">
+            <h1>Family <span>Nexus</span></h1>
+            <p class="subtitle">Select your profile to enter the dashboard</p>
+            <div class="profile-grid" id="profile-selector">
+                <!-- Profiles injected dynamically here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- 2. MAIN APPLICATION VIEW -->
+    <div id="app-view" class="view">
+        <!-- Left Sidebar component -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="current-user-tag" id="current-user-display">
+                    <!-- Loaded dynamic current user details -->
+                </div>
+                <button class="logout-btn" onclick="logout()">Exit</button>
+            </div>
+            <div class="member-list">
+                <div class="member-list-title">Household Network</div>
+                <div id="family-directory">
+                    <!-- Group member roster dynamically mapped -->
+                </div>
+            </div>
+        </aside>
+
+        <!-- Right Main Chat component -->
+        <main class="chat-container">
+            <header class="chat-header">
+                <div class="chat-title">
+                    <h2>Main House Channel</h2>
+                    <p>Encrypted local storage broadcast node</p>
+                </div>
+            </header>
+
+            <div class="message-wall" id="message-wall">
+                <!-- Chat streams dynamic instantiation -->
+            </div>
+
+            <div class="input-deck">
+                <form class="input-form" id="chat-form" onsubmit="sendMessage(event)">
+                    <input type="text" id="msg-input" placeholder="Transmission to family..." autocomplete="off" required>
+                    <button type="submit" class="send-btn">Send</button>
+                </form>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Updated family profiles using custom profile keys and parameters
+        const familyProfiles = [
+            { id: "dad", name: "Dad", color: "#457b9d", initial: "D" },
+            { id: "mom", name: "Mom", color: "#e63946", initial: "M" },
+            { id: "bedo", name: "Bedo", color: "#9d4edd", initial: "B" },
+            { id: "tym", name: "Tym", color: "#2ec4b6", initial: "T" }
+        ];
+
+        let currentUser = null;
+        
+        // Multi-tab sync infrastructure via HTML5 Broadcast Channel API
+        const chatChannel = new BroadcastChannel('family_nexus_sync');
+
+        // Check for cross-tab transmission updates
+        chatChannel.onmessage = function(event) {
+            if (event.data === 'refresh_messages') {
+                renderMessages();
+            }
+        };
+
+        // App Initializer
+        window.addEventListener('DOMContentLoaded', () => {
+            generateProfileSelectionGrid();
+            checkExistingSession();
+        });
+
+        function generateProfileSelectionGrid() {
+            const container = document.getElementById('profile-selector');
+            container.innerHTML = '';
+            
+            familyProfiles.forEach(member => {
+                const button = document.createElement('button');
+                button.className = 'profile-btn';
+                button.onclick = () => loginAs(member.id);
+                
+                button.innerHTML = `
+                    <div class="avatar-circle" style="background-color: ${member.color}">${member.initial}</div>
+                    <div class="profile-name">${member.name}</div>
+                `;
+                container.appendChild(button);
+            });
+        }
+
+        function checkExistingSession() {
+            const savedUserId = localStorage.getItem('nexus_current_user');
+            if (savedUserId) {
+                loginAs(savedUserId, false);
+            }
+        }
+
+        function loginAs(userId, setStorage = true) {
+            const user = familyProfiles.find(p => p.id === userId);
+            if (!user) return;
+
+            currentUser = user;
+            if (setStorage) {
+                localStorage.setItem('nexus_current_user', userId);
+            }
+
+            // Update UI Sidebar Header Context
+            document.getElementById('current-user-display').innerHTML = `
+                <div class="avatar-circle" style="background-color: ${user.color}">${user.initial}</div>
+                <div class="profile-name" style="font-size:0.95rem">${user.name}</div>
+            `;
+
+            // Build dynamic list of other family members
+            const directoryContainer = document.getElementById('family-directory');
+            directoryContainer.innerHTML = '';
+            familyProfiles.forEach(member => {
+                if(member.id !== currentUser.id) {
+                    const row = document.createElement('div');
+                    row.className = 'member-status-row';
+                    row.innerHTML = `
+                        <div class="status-dot"></div>
+                        <span style="font-size:0.95rem; font-weight:500;">${member.name}</span>
+                    `;
+                    directoryContainer.appendChild(row);
+                }
+            });
+
+            // Transition interfaces
+            document.getElementById('login-view').classList.remove('active');
+            document.getElementById('app-view').classList.add('active');
+
+            renderMessages();
+        }
+
+        function logout() {
+            localStorage.removeItem('nexus_current_user');
+            currentUser = null;
+            document.getElementById('app-view').classList.remove('active');
+            document.getElementById('login-view').classList.add('active');
+        }
+
+        function getMessageLog() {
+            const log = localStorage.getItem('nexus_chat_log');
+            return log ? JSON.parse(log) : [];
+        }
+
+        function renderMessages() {
+            const wall = document.getElementById('message-wall');
+            const logs = getMessageLog();
+            wall.innerHTML = '';
+
+            logs.forEach(msg => {
+                const isOutgoing = msg.senderId === currentUser.id;
+                const row = document.createElement('div');
+                row.className = `msg-row ${isOutgoing ? 'outgoing' : 'incoming'}`;
+
+                const timestamp = new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+                row.innerHTML = `
+                    <div class="msg-meta">${isOutgoing ? 'You' : msg.senderName} • ${timestamp}</div>
+                    <div class="msg-bubble">${escapeHTML(msg.text)}</div>
+                `;
+                wall.appendChild(row);
+            });
+
+            // Auto Scroll to base layout boundary
+            wall.scrollTop = wall.scrollHeight;
+        }
+
+        function sendMessage(event) {
+            event.preventDefault();
+            const input = document.getElementById('msg-input');
+            const text = input.value.trim();
+            if (!text) return;
+
+            const logs = getMessageLog();
+            const newMsg = {
+                id: 'msg_' + Date.now() + Math.random().toString(36).substr(2, 4),
+                senderId: currentUser.id,
+                senderName: currentUser.name,
+                text: text,
+                timestamp: new Date().toISOString()
+            };
+
+            logs.push(newMsg);
+            localStorage.setItem('nexus_chat_log', JSON.stringify(logs));
+            
+            input.value = '';
+            renderMessages();
+
+            // Notify open browser windows or tabs of storage data transformations
+            chatChannel.postMessage('refresh_messages');
+        }
+
+        function escapeHTML(str) {
+            return str.replace(/[&<>'"]/g, 
+                tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)
+            );
+        }
+    </script>
+</body>
+</html>
