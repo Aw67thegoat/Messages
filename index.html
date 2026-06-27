@@ -337,7 +337,6 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getDatabase, ref, set, push, onValue, get, child } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
-        // Integrated project metrics configuration with explicit Realtime Database routing mapping
         const firebaseConfig = {
             apiKey: "AIzaSyDIUXd4bIDSREr3Ktl-qXCsE5GnxkNf0Qs",
             authDomain: "family-messages-abadb.firebaseapp.com",
@@ -362,31 +361,30 @@
 
         let currentUser = null;
 
-        // Start App Engine
-        window.addEventListener('DOMContentLoaded', () => {
-            generateProfileSelectionGrid();
-            document.getElementById('connection-status').innerText = "Live Firebase Stream Node Connected";
+        // Run Grid Engine Immediately
+        generateProfileSelectionGrid();
+        document.getElementById('connection-status').innerText = "Live Firebase Stream Node Connected";
 
-            // Open constant live pipeline listener to pull new messages instantly across devices
-            const messagesRef = ref(db, 'messages');
-            onValue(messagesRef, (snapshot) => {
-                const data = snapshot.val();
-                renderMessages(data);
-            });
-
-            // Open constant pipeline listener for Bedo's Master View Terminal updates
-            const profilesRef = ref(db, 'profiles');
-            onValue(profilesRef, (snapshot) => {
-                if (currentUser && currentUser.id === 'bedo' && document.getElementById('admin-panel').style.display === 'block') {
-                    loadAdminPasswords(snapshot.val());
-                }
-            });
-
-            checkExistingSession();
+        // Open constant live pipeline listener to pull new messages instantly across devices
+        const messagesRef = ref(db, 'messages');
+        onValue(messagesRef, (snapshot) => {
+            const data = snapshot.val();
+            renderMessages(data);
         });
+
+        // Open constant pipeline listener for Bedo's Master View Terminal updates
+        const profilesRef = ref(db, 'profiles');
+        onValue(profilesRef, (snapshot) => {
+            if (currentUser && currentUser.id === 'bedo' && document.getElementById('admin-panel').style.display === 'block') {
+                loadAdminPasswords(snapshot.val());
+            }
+        });
+
+        checkExistingSession();
 
         function generateProfileSelectionGrid() {
             const container = document.getElementById('profile-selector');
+            if (!container) return;
             container.innerHTML = '';
             familyProfiles.forEach(member => {
                 const button = document.createElement('button');
@@ -402,7 +400,6 @@
 
         async function handleLoginClick(userId) {
             const dbRef = ref(db);
-            // Look up password field state inside Firebase
             const snapshot = await get(child(dbRef, `profiles/${userId}`));
             const savedPassword = snapshot.exists() ? snapshot.val().password : "";
 
@@ -459,7 +456,6 @@
             }
         }
 
-        // Global functions map to wire click callbacks out of block module scope
         window.logout = function() {
             localStorage.removeItem('nexus_current_user');
             currentUser = null;
@@ -523,7 +519,6 @@
             wall.innerHTML = '';
             if (!messagesData) return;
 
-            // Sort incoming raw database timestamp values chronologically
             const sortedMessages = Object.values(messagesData).sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
 
             sortedMessages.forEach(msg => {
