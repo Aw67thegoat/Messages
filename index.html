@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Family Nexus // Mobile Sync</title>
     <style>
         :root {
@@ -29,7 +29,6 @@
             height: 100%;
             width: 100%;
             overflow: hidden;
-            position: fixed; /* Prevents background scrolling bounce on iOS */
         }
 
         .view {
@@ -208,7 +207,7 @@
         .sidebar-user-row {
             display: flex;
             align-items: center;
-            justify-between: space-between;
+            justify-content: space-between;
             width: 100%;
         }
 
@@ -220,6 +219,7 @@
             gap: 12px;
             font-size: 0.8rem;
             flex-wrap: wrap;
+            margin-top: 5px;
         }
 
         .control-link {
@@ -259,7 +259,7 @@
             border: 1px solid var(--border-color);
             border-radius: 6px;
             color: var(--text-main);
-            padding: 6px 10px;
+            padding: 6px 12px;
             font-size: 0.85rem;
             cursor: pointer;
             font-weight: 500;
@@ -275,7 +275,7 @@
         .incoming .msg-bubble { background-color: var(--bg-panel); color: var(--text-main); border: 1px solid var(--border-color); border-top-left-radius: 2px; }
         .outgoing .msg-bubble { background: linear-gradient(135deg, var(--accent-purple), #7209b7); color: #fff; border-top-right-radius: 2px; }
 
-        .input-deck { padding: 12px 15px; border-top: 1px solid var(--border-color); background-color: var(--bg-panel); flex-shrink: 0; }
+        .input-deck { padding: 12px 15px; border-top: 1px solid var(--border-color); background-color: var(--bg-panel); flex-shrink: 0; padding-bottom: calc(12px + env(safe-area-inset-bottom)); }
         .input-form { display: flex; gap: 10px; width: 100%; }
         .input-form input { flex: 1; background-color: var(--bg-dark); border: 1px solid var(--border-color); border-radius: 8px; padding: 12px; color: var(--text-main); font-size: 16px; outline: none; min-width: 0; }
         .input-form input:focus { border-color: var(--accent-glow); }
@@ -416,19 +416,27 @@
 
         checkExistingSession();
 
-        // Safe Mobile Submit Listener Wire-Up
         const chatForm = document.getElementById('chat-form');
         chatForm.addEventListener('submit', handleFormSubmit);
 
-        // Visual Layout Fixed Keyboard Height Handler for iOS/Android Safari & Chrome
-        if (window.visualViewport) {
-            window.visualViewport.addEventListener('resize', () => {
-                document.body.style.height = window.visualViewport.height + 'px';
-                window.scrollTo(0, 0);
-                const wall = document.getElementById('message-wall');
-                if (wall) wall.scrollTop = wall.scrollHeight;
-            });
+        // Track virtual layout dimensions and match viewport directly
+        function updateViewportHeight() {
+            const viewHeight = window.visualViewport ? window.visualViewport.height : window.innerHeight;
+            document.documentElement.style.height = viewHeight + 'px';
+            document.body.style.height = viewHeight + 'px';
+            
+            const wall = document.getElementById('message-wall');
+            if (wall) wall.scrollTop = wall.scrollHeight;
         }
+
+        if (window.visualViewport) {
+            window.visualViewport.addEventListener('resize', updateViewportHeight);
+            window.visualViewport.addEventListener('scroll', updateViewportHeight);
+        }
+        window.addEventListener('resize', updateViewportHeight);
+        window.addEventListener('orientationchange', () => {
+            setTimeout(updateViewportHeight, 200);
+        });
 
         async function handleFormSubmit(event) {
             event.preventDefault();
@@ -436,7 +444,6 @@
             const text = input.value.trim();
             if (!text || !currentUser) return;
 
-            // Block multiple click triggers instantly
             const btn = document.getElementById('send-click-btn');
             btn.disabled = true;
 
@@ -458,6 +465,7 @@
             } finally {
                 btn.disabled = false;
                 input.focus();
+                setTimeout(() => { updateViewportHeight(); }, 50);
             }
         }
 
@@ -534,8 +542,7 @@
             document.getElementById('app-view').classList.add('active');
             toggleSidebar(false);
             
-            const wall = document.getElementById('message-wall');
-            setTimeout(() => { wall.scrollTop = wall.scrollHeight; }, 150);
+            updateViewportHeight();
         }
 
         function checkExistingSession() {
