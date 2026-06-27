@@ -2,8 +2,8 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Family Nexus // Firebase Crossplay Messenger</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Family Nexus // Mobile Sync</title>
     <style>
         :root {
             --bg-dark: #0a0b10;
@@ -20,16 +20,24 @@
             margin: 0;
             padding: 0;
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            -webkit-tap-highlight-color: transparent;
         }
 
         body {
             background-color: var(--bg-dark);
             color: var(--text-main);
             height: 100vh;
+            height: -webkit-fill-available;
             display: flex;
             justify-content: center;
             align-items: center;
             overflow: hidden;
+            position: fixed;
+            width: 100%;
+        }
+
+        html {
+            height: -webkit-fill-available;
         }
 
         .view {
@@ -47,7 +55,7 @@
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            padding: 20px;
+            padding: 15px;
         }
 
         .login-card {
@@ -55,15 +63,15 @@
             border: 1px solid var(--border-color);
             box-shadow: 0 0 20px rgba(0, 240, 255, 0.1);
             border-radius: 12px;
-            padding: 40px;
+            padding: 25px 20px;
             width: 100%;
-            max-width: 450px;
+            max-width: 400px;
             text-align: center;
         }
 
         .login-card h1 {
-            font-size: 1.8rem;
-            margin-bottom: 10px;
+            font-size: 1.6rem;
+            margin-bottom: 8px;
             letter-spacing: 1px;
             color: #fff;
             text-transform: uppercase;
@@ -76,44 +84,42 @@
 
         .subtitle {
             color: var(--text-muted);
-            margin-bottom: 30px;
-            font-size: 0.9rem;
+            margin-bottom: 25px;
+            font-size: 0.85rem;
         }
 
         .profile-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
-            gap: 20px;
+            gap: 15px;
         }
 
         .profile-btn {
             background-color: rgba(255, 255, 255, 0.03);
             border: 1px solid var(--border-color);
             border-radius: 8px;
-            padding: 20px 10px;
+            padding: 15px 10px;
             cursor: pointer;
             transition: all 0.2s ease;
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 10px;
+            gap: 8px;
         }
 
-        .profile-btn:hover {
+        .profile-btn:hover, .profile-btn:active {
             border-color: var(--accent-purple);
-            box-shadow: 0 0 12px rgba(157, 78, 221, 0.3);
-            transform: translateY(-2px);
             background-color: rgba(157, 78, 221, 0.05);
         }
 
         .avatar-circle {
-            width: 50px;
-            height: 50px;
+            width: 45px;
+            height: 45px;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.4rem;
+            font-size: 1.2rem;
             font-weight: bold;
             color: #fff;
         }
@@ -121,18 +127,19 @@
         .profile-name {
             color: var(--text-main);
             font-weight: 500;
-            font-size: 1rem;
+            font-size: 0.95rem;
         }
 
-        /* --- ACCESS RESTRAINT OVERLAY MODAL --- */
+        /* --- ACCESS RESTRAINT MODAL --- */
         .modal {
             display: none;
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
-            background-color: rgba(10, 11, 16, 0.85);
+            background-color: rgba(10, 11, 16, 0.9);
             justify-content: center;
             align-items: center;
-            z-index: 100;
+            z-index: 200;
+            padding: 15px;
         }
 
         .modal.active { display: flex; }
@@ -140,14 +147,14 @@
         .modal-content {
             background-color: var(--bg-panel);
             border: 1px solid var(--border-color);
-            padding: 30px;
+            padding: 25px;
             border-radius: 12px;
-            width: 90%;
-            max-width: 400px;
+            width: 100%;
+            max-width: 360px;
             text-align: center;
         }
 
-        .modal-content h3 { margin-bottom: 15px; color: #fff; }
+        .modal-content h3 { margin-bottom: 15px; color: #fff; font-size: 1.1rem; }
 
         .modal-content input {
             width: 100%;
@@ -167,33 +174,37 @@
         .modal-actions {
             display: flex;
             gap: 10px;
-            justify-content: center;
         }
 
         .btn {
-            padding: 10px 20px;
+            flex: 1;
+            padding: 12px;
             border: none;
-            border-radius: 6px;
+            border-radius: 8px;
             cursor: pointer;
             font-weight: bold;
+            font-size: 0.95rem;
         }
 
         .btn-primary { background-color: var(--accent-glow); color: var(--bg-dark); }
         .btn-secondary { background-color: transparent; border: 1px solid var(--border-color); color: var(--text-muted); }
 
-        /* --- MAIN SYSTEM INTERFACE --- */
-        #app-view { flex-direction: row; }
+        /* --- MAIN APP INTERFACE --- */
+        #app-view { flex-direction: row; position: relative; }
 
+        /* Mobile Responsive Sidebar Drawer Overlay */
         .sidebar {
             width: 280px;
             background-color: var(--bg-panel);
             border-right: 1px solid var(--border-color);
             display: flex;
             flex-direction: column;
+            z-index: 150;
+            transition: transform 0.3s ease;
         }
 
         .sidebar-header {
-            padding: 20px;
+            padding: 15px;
             border-bottom: 1px solid var(--border-color);
             display: flex;
             flex-direction: column;
@@ -208,12 +219,13 @@
         }
 
         .current-user-tag { display: flex; align-items: center; gap: 10px; }
-        .current-user-tag .avatar-circle { width: 32px; height: 32px; font-size: 0.9rem; }
+        .current-user-tag .avatar-circle { width: 32px; height: 32px; font-size: 0.85rem; }
 
         .sidebar-controls {
             display: flex;
             gap: 12px;
             font-size: 0.8rem;
+            flex-wrap: wrap;
         }
 
         .control-link {
@@ -226,49 +238,83 @@
 
         .control-link:hover { color: var(--accent-glow); }
 
-        .member-list { flex: 1; padding: 20px; overflow-y: auto; }
-        .member-list-title { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); margin-bottom: 15px; }
-        .member-status-row { display: flex; align-items: center; gap: 12px; padding: 10px 0; }
+        .member-list { flex: 1; padding: 15px; overflow-y: auto; }
+        .member-list-title { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); margin-bottom: 10px; }
+        .member-status-row { display: flex; align-items: center; gap: 12px; padding: 8px 0; }
         .status-dot { width: 8px; height: 8px; background-color: #2ec4b6; border-radius: 50%; box-shadow: 0 0 6px #2ec4b6; }
 
-        /* Bedo's Security Matrix Terminal Box */
         .admin-box {
             background-color: rgba(157, 78, 221, 0.05);
             border: 1px dashed var(--accent-purple);
             border-radius: 6px;
             padding: 10px;
-            margin-top: 15px;
+            margin-top: 5px;
             display: none;
+            max-height: 150px;
+            overflow-y: auto;
         }
         .admin-title { font-size: 0.7rem; text-transform: uppercase; color: var(--accent-purple); font-weight: bold; margin-bottom: 5px; }
         .admin-item { font-size: 0.8rem; margin: 4px 0; display: flex; justify-content: space-between; }
 
-        /* Message Streaming Container */
-        .chat-container { flex: 1; display: flex; flex-direction: column; background-color: var(--bg-dark); }
-        .chat-header { height: 73px; padding: 20px; border-bottom: 1px solid var(--border-color); display: flex; align-items: center; background-color: rgba(18, 20, 32, 0.5); }
-        .chat-title h2 { font-size: 1.1rem; font-weight: 600; }
-        .chat-title p { font-size: 0.8rem; color: var(--text-muted); }
+        /* Chat Core Container Container */
+        .chat-container { flex: 1; display: flex; flex-direction: column; background-color: var(--bg-dark); width: 100%; height: 100%; }
+        .chat-header { height: 60px; padding: 0 15px; border-bottom: 1px solid var(--border-color); display: flex; align-items: center; justify-content: space-between; background-color: rgba(18, 20, 32, 0.5); }
+        .chat-title h2 { font-size: 1rem; font-weight: 600; }
+        .chat-title p { font-size: 0.75rem; color: var(--text-muted); }
 
-        .message-wall { flex: 1; padding: 25px; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; }
-        .msg-row { display: flex; flex-direction: column; max-width: 70%; width: fit-content; }
+        /* Menu Trigger Button for Mobile Screens */
+        .menu-toggle {
+            display: none;
+            background: none;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            color: var(--text-main);
+            padding: 6px 10px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            font-weight: 500;
+        }
+
+        .message-wall { flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; }
+        .msg-row { display: flex; flex-direction: column; max-width: 85%; width: fit-content; }
         .msg-row.incoming { align-self: flex-start; align-items: flex-start; }
         .msg-row.outgoing { align-self: flex-end; align-items: flex-end; }
-        .msg-meta { font-size: 0.75rem; color: var(--text-muted); margin-bottom: 4px; padding: 0 4px; }
+        .msg-meta { font-size: 0.7rem; color: var(--text-muted); margin-bottom: 3px; padding: 0 4px; }
         
-        .msg-bubble { padding: 12px 16px; border-radius: 14px; font-size: 0.95rem; line-height: 1.4; word-break: break-word; }
+        .msg-bubble { padding: 10px 14px; border-radius: 14px; font-size: 0.9rem; line-height: 1.35; word-break: break-word; }
         .incoming .msg-bubble { background-color: var(--bg-panel); color: var(--text-main); border: 1px solid var(--border-color); border-top-left-radius: 2px; }
-        .outgoing .msg-bubble { background: linear-gradient(135deg, var(--accent-purple), #7209b7); color: #fff; border-top-right-radius: 2px; box-shadow: 0 3px 10px rgba(157, 78, 221, 0.15); }
+        .outgoing .msg-bubble { background: linear-gradient(135deg, var(--accent-purple), #7209b7); color: #fff; border-top-right-radius: 2px; }
 
-        .input-deck { padding: 20px; border-top: 1px solid var(--border-color); background-color: var(--bg-panel); }
-        .input-form { display: flex; gap: 12px; }
-        .input-form input { flex: 1; background-color: var(--bg-dark); border: 1px solid var(--border-color); border-radius: 8px; padding: 14px 16px; color: var(--text-main); font-size: 0.95rem; outline: none; }
+        .input-deck { padding: 12px 15px; border-top: 1px solid var(--border-color); background-color: var(--bg-panel); }
+        .input-form { display: flex; gap: 10px; }
+        .input-form input { flex: 1; background-color: var(--bg-dark); border: 1px solid var(--border-color); border-radius: 8px; padding: 12px; color: var(--text-main); font-size: 0.9rem; outline: none; }
         .input-form input:focus { border-color: var(--accent-glow); }
-        .send-btn { background-color: var(--accent-glow); color: var(--bg-dark); border: none; border-radius: 8px; padding: 0 24px; font-weight: bold; cursor: pointer; }
-        .send-btn:hover { box-shadow: 0 0 12px rgba(0, 240, 255, 0.6); }
+        .send-btn { background-color: var(--accent-glow); color: var(--bg-dark); border: none; border-radius: 8px; padding: 0 16px; font-weight: bold; cursor: pointer; font-size: 0.9rem; }
 
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 4px; }
+        /* Darkening background backdrop overlay when menu drawer pulls out */
+        .sidebar-backdrop {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.6);
+            z-index: 140;
+        }
+
+        /* Responsive Breakpoint Adaptations */
+        @media (max-width: 768px) {
+            .menu-toggle { display: block; }
+            .sidebar {
+                position: fixed;
+                top: 0; left: 0; bottom: 0;
+                transform: translateX(-100%);
+            }
+            .sidebar.open {
+                transform: translateX(0);
+            }
+            .sidebar.open + .sidebar-backdrop {
+                display: block;
+            }
+        }
     </style>
 </head>
 <body>
@@ -284,7 +330,7 @@
     <div id="password-modal" class="modal">
         <div class="modal-content">
             <h3 id="modal-title">Enter Profile Key</h3>
-            <input type="password" id="modal-pass-input" placeholder="••••••••">
+            <input type="password" id="modal-pass-input" placeholder="••••••••" inputmode="text">
             <div class="modal-actions">
                 <button class="btn btn-secondary" onclick="closePasswordModal()">Cancel</button>
                 <button class="btn btn-primary" id="modal-submit-btn">Verify</button>
@@ -293,7 +339,7 @@
     </div>
 
     <div id="app-view" class="view">
-        <aside class="sidebar">
+        <aside class="sidebar" id="sidebar-drawer">
             <div class="sidebar-header">
                 <div class="sidebar-user-row">
                     <div class="current-user-tag" id="current-user-display"></div>
@@ -313,20 +359,23 @@
                 <div id="family-directory"></div>
             </div>
         </aside>
+        
+        <div class="sidebar-backdrop" onclick="toggleSidebar(false)"></div>
 
         <main class="chat-container">
             <header class="chat-header">
                 <div class="chat-title">
                     <h2>Main House Channel</h2>
-                    <p id="connection-status">Connecting to Firebase Stream Module...</p>
+                    <p id="connection-status">Connecting...</p>
                 </div>
+                <button class="menu-toggle" onclick="toggleSidebar(true)">Profiles</button>
             </header>
 
             <div class="message-wall" id="message-wall"></div>
 
             <div class="input-deck">
                 <form class="input-form" id="chat-form" onsubmit="sendMessage(event)">
-                    <input type="text" id="msg-input" placeholder="Transmission to family..." autocomplete="off" required>
+                    <input type="text" id="msg-input" placeholder="Message family..." autocomplete="off" required>
                     <button type="submit" class="send-btn">Send</button>
                 </form>
             </div>
@@ -348,7 +397,6 @@
             measurementId: "G-67JXTM5WE8"
         };
 
-        // Initialize App Instance
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
@@ -361,18 +409,14 @@
 
         let currentUser = null;
 
-        // Run Grid Engine Immediately
         generateProfileSelectionGrid();
-        document.getElementById('connection-status').innerText = "Live Firebase Stream Node Connected";
+        document.getElementById('connection-status').innerText = "Live Cloud Active";
 
-        // Open constant live pipeline listener to pull new messages instantly across devices
         const messagesRef = ref(db, 'messages');
         onValue(messagesRef, (snapshot) => {
-            const data = snapshot.val();
-            renderMessages(data);
+            renderMessages(snapshot.val());
         });
 
-        // Open constant pipeline listener for Bedo's Master View Terminal updates
         const profilesRef = ref(db, 'profiles');
         onValue(profilesRef, (snapshot) => {
             if (currentUser && currentUser.id === 'bedo' && document.getElementById('admin-panel').style.display === 'block') {
@@ -381,6 +425,12 @@
         });
 
         checkExistingSession();
+
+        window.toggleSidebar = function(open) {
+            const drawer = document.getElementById('sidebar-drawer');
+            if(open) drawer.classList.add('open');
+            else drawer.classList.remove('open');
+        }
 
         function generateProfileSelectionGrid() {
             const container = document.getElementById('profile-selector');
@@ -424,7 +474,7 @@
 
             document.getElementById('current-user-display').innerHTML = `
                 <div class="avatar-circle" style="background-color: ${user.color}">${user.initial}</div>
-                <div class="profile-name" style="font-size:0.95rem">${user.name}</div>
+                <div class="profile-name" style="font-size:0.9rem">${user.name}</div>
             `;
 
             if (user.id === 'bedo') {
@@ -440,13 +490,17 @@
                 if(member.id !== currentUser.id) {
                     const row = document.createElement('div');
                     row.className = 'member-status-row';
-                    row.innerHTML = `<div class="status-dot"></div><span style="font-size:0.95rem; font-weight:500;">${member.name}</span>`;
+                    row.innerHTML = `<div class="status-dot"></div><span style="font-size:0.9rem; font-weight:500;">${member.name}</span>`;
                     directoryContainer.appendChild(row);
                 }
             });
 
             document.getElementById('login-view').classList.remove('active');
             document.getElementById('app-view').classList.add('active');
+            toggleSidebar(false);
+            
+            const wall = document.getElementById('message-wall');
+            setTimeout(() => { wall.scrollTop = wall.scrollHeight; }, 100);
         }
 
         function checkExistingSession() {
@@ -461,6 +515,7 @@
             currentUser = null;
             document.getElementById('app-view').classList.remove('active');
             document.getElementById('login-view').classList.add('active');
+            toggleSidebar(false);
         }
 
         window.closePasswordModal = function() {
@@ -482,7 +537,7 @@
         window.promptChangePassword = function() {
             openPasswordModal("Configure New Password", async (newPassword) => {
                 await set(ref(db, `profiles/${currentUser.id}`), { password: newPassword });
-                alert("Password updated inside Cloud Core.");
+                alert("Password saved to Cloud.");
                 closePasswordModal();
             });
         }
@@ -516,6 +571,8 @@
 
         function renderMessages(messagesData) {
             const wall = document.getElementById('message-wall');
+            const isAtBottom = wall.scrollHeight - wall.scrollTop <= wall.clientHeight + 100;
+            
             wall.innerHTML = '';
             if (!messagesData) return;
 
@@ -533,7 +590,10 @@
                 `;
                 wall.appendChild(row);
             });
-            wall.scrollTop = wall.scrollHeight;
+            
+            if (isAtBottom) {
+                wall.scrollTop = wall.scrollHeight;
+            }
         }
 
         window.sendMessage = async function(event) {
