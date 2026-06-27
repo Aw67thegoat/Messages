@@ -23,21 +23,12 @@
             -webkit-tap-highlight-color: transparent;
         }
 
-        body {
+        html, body {
             background-color: var(--bg-dark);
             color: var(--text-main);
-            height: 100vh;
-            height: -webkit-fill-available;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            overflow: hidden;
-            position: fixed;
+            height: 100%;
             width: 100%;
-        }
-
-        html {
-            height: -webkit-fill-available;
+            overflow: hidden;
         }
 
         .view {
@@ -56,6 +47,7 @@
             justify-content: center;
             align-items: center;
             padding: 15px;
+            overflow-y: auto;
         }
 
         .login-card {
@@ -190,15 +182,15 @@
         .btn-secondary { background-color: transparent; border: 1px solid var(--border-color); color: var(--text-muted); }
 
         /* --- MAIN APP INTERFACE --- */
-        #app-view { flex-direction: row; position: relative; }
+        #app-view { flex-direction: row; position: relative; height: 100%; width: 100%; }
 
-        /* Mobile Responsive Sidebar Drawer Overlay */
         .sidebar {
             width: 280px;
             background-color: var(--bg-panel);
             border-right: 1px solid var(--border-color);
             display: flex;
             flex-direction: column;
+            height: 100%;
             z-index: 150;
             transition: transform 0.3s ease;
         }
@@ -257,12 +249,11 @@
         .admin-item { font-size: 0.8rem; margin: 4px 0; display: flex; justify-content: space-between; }
 
         /* Chat Core Container Container */
-        .chat-container { flex: 1; display: flex; flex-direction: column; background-color: var(--bg-dark); width: 100%; height: 100%; }
-        .chat-header { height: 60px; padding: 0 15px; border-bottom: 1px solid var(--border-color); display: flex; align-items: center; justify-content: space-between; background-color: rgba(18, 20, 32, 0.5); }
+        .chat-container { flex: 1; display: flex; flex-direction: column; background-color: var(--bg-dark); height: 100%; min-width: 0; }
+        .chat-header { height: 60px; padding: 0 15px; border-bottom: 1px solid var(--border-color); display: flex; align-items: center; justify-content: space-between; background-color: rgba(18, 20, 32, 0.5); flex-shrink: 0; }
         .chat-title h2 { font-size: 1rem; font-weight: 600; }
         .chat-title p { font-size: 0.75rem; color: var(--text-muted); }
 
-        /* Menu Trigger Button for Mobile Screens */
         .menu-toggle {
             display: none;
             background: none;
@@ -275,7 +266,7 @@
             font-weight: 500;
         }
 
-        .message-wall { flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; }
+        .message-wall { flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; -webkit-overflow-scrolling: touch; }
         .msg-row { display: flex; flex-direction: column; max-width: 85%; width: fit-content; }
         .msg-row.incoming { align-self: flex-start; align-items: flex-start; }
         .msg-row.outgoing { align-self: flex-end; align-items: flex-end; }
@@ -285,13 +276,12 @@
         .incoming .msg-bubble { background-color: var(--bg-panel); color: var(--text-main); border: 1px solid var(--border-color); border-top-left-radius: 2px; }
         .outgoing .msg-bubble { background: linear-gradient(135deg, var(--accent-purple), #7209b7); color: #fff; border-top-right-radius: 2px; }
 
-        .input-deck { padding: 12px 15px; border-top: 1px solid var(--border-color); background-color: var(--bg-panel); }
+        .input-deck { padding: 12px 15px; border-top: 1px solid var(--border-color); background-color: var(--bg-panel); flex-shrink: 0; }
         .input-form { display: flex; gap: 10px; }
-        .input-form input { flex: 1; background-color: var(--bg-dark); border: 1px solid var(--border-color); border-radius: 8px; padding: 12px; color: var(--text-main); font-size: 0.9rem; outline: none; }
+        .input-form input { flex: 1; background-color: var(--bg-dark); border: 1px solid var(--border-color); border-radius: 8px; padding: 12px; color: var(--text-main); font-size: 16px; outline: none; }
         .input-form input:focus { border-color: var(--accent-glow); }
         .send-btn { background-color: var(--accent-glow); color: var(--bg-dark); border: none; border-radius: 8px; padding: 0 16px; font-weight: bold; cursor: pointer; font-size: 0.9rem; }
 
-        /* Darkening background backdrop overlay when menu drawer pulls out */
         .sidebar-backdrop {
             display: none;
             position: fixed;
@@ -307,6 +297,7 @@
                 position: fixed;
                 top: 0; left: 0; bottom: 0;
                 transform: translateX(-100%);
+                height: 100%;
             }
             .sidebar.open {
                 transform: translateX(0);
@@ -330,7 +321,7 @@
     <div id="password-modal" class="modal">
         <div class="modal-content">
             <h3 id="modal-title">Enter Profile Key</h3>
-            <input type="password" id="modal-pass-input" placeholder="••••••••" inputmode="text">
+            <input type="password" id="modal-pass-input" placeholder="••••••••">
             <div class="modal-actions">
                 <button class="btn btn-secondary" onclick="closePasswordModal()">Cancel</button>
                 <button class="btn btn-primary" id="modal-submit-btn">Verify</button>
