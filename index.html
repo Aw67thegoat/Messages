@@ -337,17 +337,16 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getDatabase, ref, set, push, onValue, get, child } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
-        // ==========================================
-        // PASTE YOUR COPIED FIREBASE CONFIG METRICS HERE
-        // ==========================================
+        // Integrated project metrics configuration with explicit Realtime Database routing mapping
         const firebaseConfig = {
-            apiKey: "YOUR_API_KEY",
-            authDomain: "YOUR_AUTH_DOMAIN",
-            databaseURL: "YOUR_DATABASE_URL",
-            projectId: "YOUR_PROJECT_ID",
-            storageBucket: "YOUR_STORAGE_BUCKET",
-            messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-            appId: "YOUR_APP_ID"
+            apiKey: "AIzaSyDIUXd4bIDSREr3Ktl-qXCsE5GnxkNf0Qs",
+            authDomain: "family-messages-abadb.firebaseapp.com",
+            databaseURL: "https://family-messages-abadb-default-rtdb.firebaseio.com",
+            projectId: "family-messages-abadb",
+            storageBucket: "family-messages-abadb.firebasestorage.app",
+            messagingSenderId: "1056419617993",
+            appId: "1:1056419617993:web:f6e56172e9709ab7158118",
+            measurementId: "G-67JXTM5WE8"
         };
 
         // Initialize App Instance
@@ -366,11 +365,6 @@
         // Start App Engine
         window.addEventListener('DOMContentLoaded', () => {
             generateProfileSelectionGrid();
-            
-            if (firebaseConfig.apiKey === "YOUR_API_KEY") {
-                document.getElementById('connection-status').innerText = "Database credential configuration required at base of file.";
-                return;
-            }
             document.getElementById('connection-status').innerText = "Live Firebase Stream Node Connected";
 
             // Open constant live pipeline listener to pull new messages instantly across devices
